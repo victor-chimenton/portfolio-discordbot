@@ -1,2 +1,2 @@
-rootProject.name = "portifolio-discordbot"
-
+rootProject.name = "portfolio-discordbot"
+include("core")
