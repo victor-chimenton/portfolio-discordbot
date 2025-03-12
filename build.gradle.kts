@@ -1,19 +1,35 @@
 plugins {
     id("java")
+    id("org.springframework.boot") version "3.4.3" apply false
+    id("io.spring.dependency-management") version "1.1.7" apply false
 }
 
-group = "com.victorchimenton"
-version = "1.0-SNAPSHOT"
+allprojects {
+    group = "com.victorchimenton"
+    version = "1.0-SNAPSHOT"
 
-repositories {
-    mavenCentral()
+    repositories {
+        mavenCentral()
+    }
 }
 
-dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+subprojects {
+    apply(plugin = "java")
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    dependencies {
+        compileOnly("org.projectlombok:lombok")
+        annotationProcessor("org.projectlombok:lombok")
+        implementation("org.slf4j:slf4j-api")
+    }
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
+
+
+
+
+
