@@ -1,14 +1,11 @@
 package com.victorchimenton.bot.listener;
 
+import com.victorchimenton.bot.service.ModerationService;
 import com.victorchimenton.core.model.GuildConfig;
 import com.victorchimenton.core.service.GuildConfigService;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.springframework.stereotype.Component;
@@ -19,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class MessageListener extends ListenerAdapter {
 
   private final GuildConfigService guildConfigService;
+  private final ModerationService moderationService;
 
   @Override
   public void onMessageReceived(MessageReceivedEvent event) {
@@ -26,9 +24,9 @@ public class MessageListener extends ListenerAdapter {
       return;
     }
 
-    Guild guild = event.getGuild();
-    Member member = event.getMember();
-    Message message = event.getMessage();
+    var guild = event.getGuild();
+    var member = event.getMember();
+    var message = event.getMessage();
 
     if (member == null) {
       return;
@@ -43,25 +41,18 @@ public class MessageListener extends ListenerAdapter {
 
                 CompletableFuture.runAsync(
                     () -> {
-                      if (config.isBlockInvites()
-                          && !member.hasPermission(Permission.ADMINISTRATOR)) {
-                        String content = message.getContentRaw();
-                        if (content.matches(".*discord.gg/[a-zA-Z0-9]+.*")
-                            || content.matches(".*discordapp.com/invite/[a-zA-Z0-9]+.*")) {
-                          message.delete().queue();
-                          log.debug(
-                              "Deleted message with invite from {}", member.getUser().getAsTag());
-                        }
-                      }
-
-                      if (config.isBlockLinks()
-                          && !member.hasPermission(Permission.ADMINISTRATOR)) {
-                        String content = message.getContentRaw();
-                        if (content.matches(".*https?://.*")) {
-                          message.delete().queue();
-                          log.debug(
-                              "Deleted message with link from {}", member.getUser().getAsTag());
-                        }
+                      if (moderationService.checkMessage(message, member, config)) {
+                        message
+                            .delete()
+                            .queue(
+                                success ->
+                                    log.debug(
+                                        "Deleted message from {}", member.getUser().getAsTag()),
+                                error ->
+                                    log.warn(
+                                        "Failed to delete message from {}",
+                                        member.getUser().getAsTag(),
+                                        error));
                       }
                     });
               }

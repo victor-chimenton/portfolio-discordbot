@@ -1,6 +1,7 @@
 package com.victorchimenton.bot.config;
 
 import com.victorchimenton.bot.listener.GuildListener;
+import com.victorchimenton.bot.listener.GuildMemberListener;
 import com.victorchimenton.bot.listener.MessageListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,11 +26,12 @@ public class DiscordBotConfig {
 
   private final MessageListener messageListener;
   private final GuildListener guildListener;
+  private final GuildMemberListener guildMemberListener;
 
   @Bean
   public JDA jda() throws Exception {
     log.info("Initializing discord bot...");
-    JDA jda =
+    var jda =
         JDABuilder.createDefault(botToken)
             .setStatus(OnlineStatus.ONLINE)
             .setActivity(Activity.playing("Serving $help"))
@@ -39,7 +41,7 @@ public class DiscordBotConfig {
                 GatewayIntent.MESSAGE_CONTENT)
             .setMemberCachePolicy(MemberCachePolicy.ALL)
             .setChunkingFilter(ChunkingFilter.ALL)
-            .addEventListeners(messageListener, guildListener)
+            .addEventListeners(messageListener, guildListener, guildMemberListener)
             .build();
 
     jda.awaitReady();
