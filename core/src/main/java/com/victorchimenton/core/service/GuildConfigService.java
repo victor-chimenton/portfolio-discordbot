@@ -73,14 +73,14 @@ public class GuildConfigService {
             });
   }
 
-  public CompletableFuture<List<GuildConfig.ConfigChangeLog>> getGuildConfigChangeLogs(
+  public CompletableFuture<List<GuildConfig.ConfigEventLog>> getGuildConfigEventLog(
       String guildId) {
     return getConfigByGuildId(guildId)
         .thenApply(
-            optionalConfig -> optionalConfig.map(GuildConfig::getChangeLogs).orElseGet(List::of))
+            optionalConfig -> optionalConfig.map(GuildConfig::getEventLogs).orElseGet(List::of))
         .exceptionally(
             ex -> {
-              log.error("Error retrieving change logs for guild {}", guildId, ex);
+              log.error("Error retrieving event logs for guild {}", guildId, ex);
               throw new CompletionException(ex);
             });
   }
