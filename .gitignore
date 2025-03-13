@@ -41,7 +41,6 @@ bin/
 ### Mac OS ###
 .DS_Store
 .idea/
-*.iml
 
 .idea/checkstyle-idea.xml
 .idea/codeStyles/Project.xml
@@ -50,10 +49,11 @@ bin/
 .idea/misc.xml
 .idea/uiDesigner.xml
 .idea/vcs.xml
-
 .idea/.name
 .idea/gradle.xml
 .idea/.gitignore
 .idea/checkstyleidea-libs/readme.txt
 config/checkstyle/suppressions.xml
 config/checkstyle/google_checks.xml
+
+*.properties

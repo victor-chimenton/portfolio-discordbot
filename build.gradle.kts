@@ -25,6 +25,7 @@ subprojects {
         compileOnly("org.projectlombok:lombok")
         annotationProcessor("org.projectlombok:lombok")
         implementation("org.slf4j:slf4j-api")
+        implementation("com.google.guava:guava:33.4.0-jre")
     }
 }
 

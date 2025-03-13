@@ -18,11 +18,22 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class GuildConfigService {
   private final GuildConfigRepository guildConfigRepository;
+  private final GuildConfigCacheService guildConfigCacheService;
 
   public CompletableFuture<Optional<GuildConfig>> getConfigByGuildId(String guildId) {
+    var cachedConfig = guildConfigCacheService.getConfig(guildId);
+    if (cachedConfig.isPresent()) {
+      log.debug("Config for guild {} found in cache", guildId);
+      return CompletableFuture.completedFuture(cachedConfig);
+    }
+
     return AsyncOperationUtil.executeAsync(
         guildId,
-        guildConfigRepository::findByGuildId,
+        id -> {
+          var config = guildConfigRepository.findByGuildId(id);
+          guildConfigCacheService.cacheConfig(id, config);
+          return config;
+        },
         "Retrieved configuration for guild " + guildId,
         "Failed to retrieve configuration for guild " + guildId);
   }
@@ -39,7 +50,11 @@ public class GuildConfigService {
   public CompletableFuture<GuildConfig> saveGuildConfig(GuildConfig config) {
     return AsyncOperationUtil.executeAsync(
         config,
-        guildConfigRepository::save,
+        conf -> {
+          var savedConfig = guildConfigRepository.save(conf);
+          guildConfigCacheService.invalidateConfig(conf.getGuildId());
+          return savedConfig;
+        },
         "Saved configuration for guild " + config.getGuildId(),
         "Failed to save configuration for guild " + config.getGuildId());
   }
